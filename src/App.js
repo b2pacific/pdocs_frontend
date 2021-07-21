@@ -1,25 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Redirect, Route } from "react-router-dom";
+import GroupEditor from "./groupEditor";
+import SyncingEditor from "./syncingEditor";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Route
+        path="/"
+        exact
+        component={GroupEditor}
+      />
+      <Route path="/:id" render={(props) => {
+      const id = props.match.params.id;   
+      return <SyncingEditor groupId = {id} />
+      }} />
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
