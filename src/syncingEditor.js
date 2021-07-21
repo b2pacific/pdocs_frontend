@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import { createEditor } from "slate";
 
-import { Slate, Editable, withReact, useSlateStatic } from "slate-react";
+import { Slate, Editable, withReact } from "slate-react";
 
 import initialValue from "./slateInitialValue";
 import {
