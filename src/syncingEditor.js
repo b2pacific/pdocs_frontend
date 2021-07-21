@@ -32,7 +32,7 @@ import Modal from "react-modal";
 
 import io from "socket.io-client";
 
-const socket = io("http://localhost:4000");
+const socket = io("https://pdocsbackend.herokuapp.com/");
 
 // interface Props {
 //   groupId?: string;
@@ -59,7 +59,7 @@ const SyncingEditor = ({ groupId }) => {
     if (group.current) {
       socket.emit("initialize", group.current);
     } else {
-      fetch("http://localhost:4000/create")
+      fetch("https://pdocsbackend.herokuapp.com/create")
         .then((x) => x.json())
         .then((data) => {
           //<Redirect to={`/${data.groupId}`} />
@@ -415,7 +415,7 @@ const SyncingEditor = ({ groupId }) => {
           gridTemplateRows: "100px",
           alignItems: "center",
           justifyContent: "space-between",
-          zIndex: 1
+          zIndex: 1,
         }}
       >
         <h1>PDocs</h1>
