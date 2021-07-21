@@ -7,7 +7,7 @@ const GroupEditor = (data) => {
   const [flag, setflag] = React.useState(false);
   const [id, setId] = React.useState();
   React.useEffect(() => {
-    fetch("http://localhost:4000/create")
+    fetch("https://pdocsbackend.herokuapp.com/create")
       .then((x) => x.json())
       .then((data) => {
         // socket.emit("initialize", data.groupId);
