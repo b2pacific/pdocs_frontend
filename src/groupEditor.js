@@ -1,18 +1,21 @@
 import * as React from "react";
 import { Redirect } from "react-router-dom";
 import SyncingEditor from "./syncingEditor";
+import { BACKEND_URL, PROD_BACKEND_URL } from "./url";
+
+const backendURL = PROD_BACKEND_URL;
 
 const GroupEditor = (data) => {
   const [value, setValue] = React.useState("");
   const [flag, setflag] = React.useState(false);
   const [id, setId] = React.useState();
   React.useEffect(() => {
-    fetch("https://pdocsbackend.herokuapp.com/create")
+    fetch(`${backendURL}create`)
       .then((x) => x.json())
       .then((data) => {
         // socket.emit("initialize", data.groupId);
         // group.current = data.groupId;
-        console.log("Value", data);
+        // console.log("Value", data);
         setId(data.groupId);
       })
       .catch((err) => console.log("error", err));
@@ -23,10 +26,10 @@ const GroupEditor = (data) => {
       {flag ? (
         value.length > 0 ? (
           //console.log("Value", value);
-          <Redirect to={`/${value}`} />
+          <Redirect to={`/session/${value}`} />
         ) : (
           //<SyncingEditor groupId={value}/>
-          <Redirect to={`/${id}`} />
+          <Redirect to={`/session/${id}`} />
         )
       ) : (
         <div>
@@ -37,9 +40,33 @@ const GroupEditor = (data) => {
               paddingLeft: "20px",
               paddingTop: "15px",
               color: "white",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              alignItems: "space-between"
             }}
           >
-            <h1>PDocs</h1>
+            <div style={{ width: "100px" }}>
+              <a
+                href="/"
+                style={{
+                  color: "white",
+                  textDecoration: "none",
+                }}
+              >
+                <h1>PDocs</h1>
+              </a>
+            </div>
+            <div style={{justifySelf: "end", marginRight: "20px", alignSelf: "center"}}>
+              <a
+                href="/about"
+                style={{
+                  color: "white",
+                  textDecoration: "none",
+                }}
+              >
+                <h3>About</h3>
+              </a>
+            </div>
           </div>
           <div
             style={{
@@ -119,6 +146,20 @@ const GroupEditor = (data) => {
           </div>
         </div>
       )}
+      <div
+        style={{
+          textAlign: "center",
+          position: "fixed",
+          bottom: "10px",
+          width: "100%",
+          height: "20px",
+          color: "#71EFA3",
+          fontSize: "15px",
+          fontWeight: "bold",
+        }}
+      >
+        Made By Prashant Pandey
+      </div>
     </div>
   );
 };

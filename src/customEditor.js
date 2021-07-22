@@ -108,7 +108,7 @@ const CustomEditor = {
   },
 
   changeFontColor(editor, color) {
-    console.log("Color", color);
+    // console.log("Color", color);
     Transforms.setNodes(
       editor,
       { color: color },
@@ -117,7 +117,7 @@ const CustomEditor = {
   },
 
   toggleAlignment(editor, align) {
-    console.log("Alignment");
+    // console.log("Alignment");
     Transforms.setNodes(
       editor,
       { alignment: align },

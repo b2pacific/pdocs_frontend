@@ -8,6 +8,16 @@ body {
   min-height: 800px;
 }
 
+::-moz-selection { 
+  color: white;
+  background: #71EFA3;
+}
+
+::selection {
+  color: white;
+  background: #71EFA3;
+}
+
 p {
   margin-top: 0;
   margin-bottom: 0;

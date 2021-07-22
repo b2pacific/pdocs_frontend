@@ -31,15 +31,18 @@ import { FiAlignCenter } from "react-icons/fi";
 import Modal from "react-modal";
 
 import io from "socket.io-client";
+import { BACKEND_URL, PROD_BACKEND_URL } from "./url";
 
-const socket = io("https://pdocsbackend.herokuapp.com/");
+const backendURL = PROD_BACKEND_URL;
+
+const socket = io(backendURL);
 
 // interface Props {
 //   groupId?: string;
 // }
 
 const SyncingEditor = ({ groupId }) => {
-  console.log(groupId);
+  // console.log(groupId);
 
   const editor = useRef(withReact(createEditor()));
   // Add the initial value when setting up our state.
@@ -51,15 +54,17 @@ const SyncingEditor = ({ groupId }) => {
   const [linkValue, setLinkValue] = useState({ link: "", text: "Hello" });
   const [currEditor, setcurrEditor] = useState(editor.current);
 
-  const id = useRef(`${socket.id}`);
+  const id = useRef(socket.id);
   const remote = useRef(false);
   const group = useRef(groupId);
 
   useEffect(() => {
+    // console.log(socket.id);
+    // id.current = socket.id;
     if (group.current) {
       socket.emit("initialize", group.current);
     } else {
-      fetch("https://pdocsbackend.herokuapp.com/create")
+      fetch(`${backendURL}create`)
         .then((x) => x.json())
         .then((data) => {
           //<Redirect to={`/${data.groupId}`} />
@@ -70,16 +75,23 @@ const SyncingEditor = ({ groupId }) => {
     }
 
     socket.on("new-remote-operations", ({ editorId, ops }) => {
+      // console.log(ops);
+      // console.log(id.current);
       if (id.current !== editorId) {
         remote.current = true;
         JSON.parse(ops).forEach((op) => {
           if (op.type !== "merge_node" && op.type !== "insert_node") {
-            editor.apply(op);
+            editor.current.apply(op);
           }
         });
         remote.current = false;
       }
     });
+
+    // socket.io.on("open", () => {
+    //   console.log(socket.id);
+    //   id.current = socket.id;
+    // })
 
     socket.io.on("reconnect", () => {
       socket.emit("initialize", group.current);
@@ -89,6 +101,11 @@ const SyncingEditor = ({ groupId }) => {
       socket.off("new-remote-operations");
     };
   }, []);
+
+  useEffect(() => {
+    // console.log(socket.id);
+    id.current = socket.id;
+  }, [socket.id]);
 
   useEffect(() => {
     socket.on("update-members", (mem) => {
@@ -102,14 +119,14 @@ const SyncingEditor = ({ groupId }) => {
 
   useEffect(() => {
     socket.on("send-data", (val) => {
-      console.log(val[0].children[0].text);
+      // console.log(val[0].children[0].text);
       remote.current = true;
       setValue(val);
       remote.current = false;
     });
     socket.on("get-data", (id) => {
       if (socket.id !== id) {
-        console.log("Sending", value);
+        // console.log("Sending", value);
         socket.emit("send-data", { value: value, id: group.current });
       }
     });
@@ -155,26 +172,41 @@ const SyncingEditor = ({ groupId }) => {
       style={{
         minHeight: "1000px",
         paddingBottom: "30px",
-        backgroundColor: "#F54748",
+        backgroundColor: "white",
       }}
+      // onMouseDown={(event) => {
+      //   event.preventDefault();
+      //   if (isColor) {
+      //     setColor(false);
+      //   }
+
+      //   if (isSize) {
+      //     setSize(false);
+      //   }
+      // }}
     >
       {isColor ? (
         <div
           style={{
+            backgroundColor: "lightgray",
             position: "absolute",
-            top: "150px",
-            left: "70%",
-            width: "100px",
-            height: "200px",
+            top: "180px",
+            left: "66%",
+            width: "90px",
+            height: "auto",
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
             gridTemplateRows: "repeat(3, 20px)",
+            paddingLeft: "10px",
+            paddingTop: "10px",
+            paddingBottom: "10px",
+            borderRadius: "10px",
           }}
         >
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "red");
+              CustomEditor.changeFontColor(editor.current, "red");
             }}
             style={{
               height: "15px",
@@ -186,7 +218,7 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "black");
+              CustomEditor.changeFontColor(editor.current, "black");
             }}
             style={{
               height: "15px",
@@ -198,7 +230,7 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "blue");
+              CustomEditor.changeFontColor(editor.current, "blue");
             }}
             style={{
               height: "15px",
@@ -210,7 +242,7 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "cyan");
+              CustomEditor.changeFontColor(editor.current, "cyan");
             }}
             style={{
               height: "15px",
@@ -222,7 +254,7 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "green");
+              CustomEditor.changeFontColor(editor.current, "green");
             }}
             style={{
               height: "15px",
@@ -234,19 +266,20 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "orange");
+              CustomEditor.changeFontColor(editor.current, "orange");
             }}
             style={{
               height: "15px",
               width: "15px",
               borderRadius: "50%",
               backgroundColor: "orange",
+              cursor: "default",
             }}
           ></div>
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "gray");
+              CustomEditor.changeFontColor(editor.current, "gray");
             }}
             style={{
               height: "15px",
@@ -258,7 +291,7 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "pink");
+              CustomEditor.changeFontColor(editor.current, "pink");
             }}
             style={{
               height: "15px",
@@ -270,13 +303,14 @@ const SyncingEditor = ({ groupId }) => {
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontColor(editor, "purple");
+              CustomEditor.changeFontColor(editor.current, "purple");
             }}
             style={{
               height: "15px",
               width: "15px",
               borderRadius: "50%",
               backgroundColor: "purple",
+              cursor: "default",
             }}
           ></div>
         </div>
@@ -285,49 +319,53 @@ const SyncingEditor = ({ groupId }) => {
       {isSize ? (
         <div
           style={{
+            backgroundColor: "lightgray",
             position: "absolute",
-            top: "150px",
-            left: "72%",
+            top: "180px",
+            left: "73%",
             width: "50px",
-            height: "150px",
+            height: "auto",
             display: "grid",
             gridTemplateColumns: "1fr",
             gridTemplateRows: "repeat(4, 23px)",
+            paddingBottom: "10px",
+            paddingTop: "10px",
+            borderRadius: "10px",
           }}
         >
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontSize(editor, "8px");
+              CustomEditor.changeFontSize(editor.current, "8px");
             }}
-            style={{ textAlign: "center" }}
+            style={{ textAlign: "center", cursor: "default" }}
           >
             8
           </div>
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontSize(editor, "11px");
+              CustomEditor.changeFontSize(editor.current, "11px");
             }}
-            style={{ textAlign: "center" }}
+            style={{ textAlign: "center", cursor: "default" }}
           >
             11
           </div>
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontSize(editor, "15px");
+              CustomEditor.changeFontSize(editor.current, "15px");
             }}
-            style={{ textAlign: "center" }}
+            style={{ textAlign: "center", cursor: "default" }}
           >
             15
           </div>
           <div
             onMouseDown={(event) => {
               event.preventDefault();
-              CustomEditor.changeFontSize(editor, "18px");
+              CustomEditor.changeFontSize(editor.current, "18px");
             }}
-            style={{ textAlign: "center" }}
+            style={{ textAlign: "center", cursor: "default" }}
           >
             18
           </div>
@@ -341,18 +379,21 @@ const SyncingEditor = ({ groupId }) => {
         ariaHideApp={false}
         style={{
           content: {
-            top: "50%",
+            top: "40%",
             left: "50%",
             right: "auto",
             bottom: "auto",
-            height: "200px",
-            width: "200px",
+            height: "100px",
+            width: "300px",
+            backgroundColor: "#50CB93",
+            color: "white",
           },
         }}
       >
-        <div style={{ marginTop: "10px" }}>
+        <div style={{ marginTop: "5px" }}>
           Link
           <input
+            style={{ marginLeft: "10px" }}
             value={linkValue.link}
             onChange={(event) =>
               setLinkValue((prevState) => ({
@@ -365,6 +406,7 @@ const SyncingEditor = ({ groupId }) => {
         <div style={{ marginTop: "10px" }}>
           Text
           <input
+            style={{ marginLeft: "10px" }}
             value={linkValue.text}
             onChange={(event) =>
               setLinkValue((prevState) => ({
@@ -376,11 +418,16 @@ const SyncingEditor = ({ groupId }) => {
         </div>
         <div
           style={{
-            width: "50px",
-            height: "20px",
-            backgroundColor: "lightgray",
+            width: "55px",
+            height: "25px",
+            backgroundColor: "#ACFFAD",
             marginTop: "10px",
             cursor: "default",
+            color: "white",
+            borderRadius: "5px",
+            textAlign: "center",
+            fontWeight: "bold",
+            paddingTop: "5px"
           }}
           onMouseDown={(event) => {
             event.preventDefault();
@@ -418,11 +465,13 @@ const SyncingEditor = ({ groupId }) => {
           zIndex: 1,
         }}
       >
-        <h1>PDocs</h1>
+        <a href="/" style={{ color: "white", textDecoration: "none" }}>
+          <h1>PDocs</h1>
+        </a>
         <h5 style={{ textDecoration: "underline", fontSize: "15px" }}>
           Current Session: {group.current}
         </h5>
-        <h5>Number of Members: {num}</h5>
+        <h4>Number of Members: {num}</h4>
       </div>
       <div
         style={{
@@ -436,8 +485,8 @@ const SyncingEditor = ({ groupId }) => {
       >
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             width: "30px",
             height: "24px",
@@ -449,15 +498,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleBoldMark(editor);
+            CustomEditor.toggleBoldMark(editor.current);
           }}
         >
           <FaBold size="20px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -469,15 +518,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleItalicMark(editor);
+            CustomEditor.toggleItalicMark(editor.current);
           }}
         >
           <FaItalic size="20px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -489,15 +538,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleCodeBlock(editor);
+            CustomEditor.toggleCodeBlock(editor.current);
           }}
         >
           <BiCode size="25px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -509,15 +558,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleUnderLine(editor);
+            CustomEditor.toggleUnderLine(editor.current);
           }}
         >
           <FaUnderline size="20px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -529,15 +578,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleAlignment(editor, "left");
+            CustomEditor.toggleAlignment(editor.current, "left");
           }}
         >
           <BiAlignLeft size="25px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -549,15 +598,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleAlignment(editor, "center");
+            CustomEditor.toggleAlignment(editor.current, "center");
           }}
         >
           <FiAlignCenter size="25px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -569,15 +618,15 @@ const SyncingEditor = ({ groupId }) => {
           tabIndex="0"
           onMouseDown={(event) => {
             event.preventDefault();
-            CustomEditor.toggleAlignment(editor, "right");
+            CustomEditor.toggleAlignment(editor.current, "right");
           }}
         >
           <BiAlignRight size="25px" />
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -588,11 +637,11 @@ const SyncingEditor = ({ groupId }) => {
           role="button"
           tabIndex="0"
           onMouseDown={(event) => {
-            console.log("Curr", editor.current);
+            // console.log("Curr", editor.current);
             setcurrEditor(editor.current.selection);
             event.preventDefault();
             setModalOpen((preState) => !preState);
-            console.log(isModalOpen);
+            // console.log(isModalOpen);
             //CustomEditor.toggleBoldMark(editor);
           }}
         >
@@ -600,8 +649,8 @@ const SyncingEditor = ({ groupId }) => {
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -620,8 +669,8 @@ const SyncingEditor = ({ groupId }) => {
         </div>
         <div
           style={{
-            color: "#ACFFAD",
-            backgroundColor: "white",
+            color: "white",
+            backgroundColor: "#54436B",
             cursor: "pointer",
             borderRadius: "5px",
             width: "30px",
@@ -646,10 +695,16 @@ const SyncingEditor = ({ groupId }) => {
           marginTop: 0,
           marginBottom: "30px",
           width: "80%",
-          borderLeftColor: "black",
-          borderLeftWidth: "5px",
-          minHeight: "500px",
+          // borderLeftColor: "black",
+          // borderLeftWidth: "5px",
+          minHeight: "600px",
           backgroundColor: "white",
+          borderStyle: "solid",
+          borderColor: "black",
+          borderWidth: "3px",
+          borderRadius: "5px",
+          paddingLeft: "5px",
+          paddingTop: "3px",
         }}
       >
         <Slate
@@ -685,43 +740,43 @@ const SyncingEditor = ({ groupId }) => {
               //console.log(event);
               if (event.key === "b" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toggleBoldMark(editor);
+                CustomEditor.toggleBoldMark(editor.current);
               }
               if (event.key === "`" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toggleCodeBlock(editor);
+                CustomEditor.toggleCodeBlock(editor.current);
               }
               if (event.key === "i" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toggleItalicMark(editor);
+                CustomEditor.toggleItalicMark(editor.current);
               }
               if (event.key === "l" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toggleUnderLine(editor);
+                CustomEditor.toggleUnderLine(editor.current);
               }
               if (event.key === "o" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toLink(editor);
+                CustomEditor.toLink(editor.current);
               }
               if (event.key === "j" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.changeFontSize(editor);
+                CustomEditor.changeFontSize(editor.current);
               }
               if (event.key === "e" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toggleBlock(editor, "numbered-list");
+                CustomEditor.toggleBlock(editor.current, "numbered-list");
               }
               if (event.key === "p" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.toggleAlignment(editor, "right");
+                CustomEditor.toggleAlignment(editor.current, "right");
               }
               if (event.key === "h" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.changeFontColor(editor, "orange");
+                CustomEditor.changeFontColor(editor.current, "orange");
               }
               if (event.key === "f" && event.ctrlKey) {
                 event.preventDefault();
-                CustomEditor.changeFontColor(editor, "black");
+                CustomEditor.changeFontColor(editor.current, "black");
               }
             }}
           />
