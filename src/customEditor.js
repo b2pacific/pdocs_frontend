@@ -57,7 +57,7 @@ const CustomEditor = {
   Link(editor, link, text, editorSelection) {
     if (!link) return;
 
-    console.log(editor);
+    //console.log(editor);
 
     const node = {
       type: "link",
@@ -68,7 +68,7 @@ const CustomEditor = {
     const selection = editorSelection;
     editor.selection = selection;
 
-    console.log("selection", editorSelection);
+    //console.log("selection", editorSelection);
 
     ReactEditor.focus(editor);
 
@@ -88,7 +88,7 @@ const CustomEditor = {
         selection.focus?.path
       );
 
-      console.log("ParentNode", parentNode);
+      //console.log("ParentNode", parentNode);
 
       if (editor.isVoid(parentNode)) {
         Transforms.insertNodes(editor, node, {
@@ -96,7 +96,7 @@ const CustomEditor = {
           select: true,
         });
       } else if (Range.isCollapsed(selection)) {
-        console.log("Collapsed");
+        //console.log("Collapsed");
         Transforms.insertNodes(editor, node, { select: true });
       } else {
         Transforms.wrapNodes(editor, node, { split: true });
@@ -181,6 +181,7 @@ const CustomEditor = {
 
   toggleBoldMark(editor) {
     const isActive = CustomEditor.isBoldMarkActive(editor);
+    console.log(isActive);
     Transforms.setNodes(
       editor,
       { bold: isActive ? false : true },

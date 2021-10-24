@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-import { createEditor } from "slate";
+import { createEditor, Editor } from "slate";
 
 import { Slate, Editable, withReact } from "slate-react";
 
@@ -79,6 +79,7 @@ const SyncingEditor = ({ groupId }) => {
       // console.log(id.current);
       if (id.current !== editorId) {
         remote.current = true;
+        //console.log(ops);
         JSON.parse(ops).forEach((op) => {
           if (op.type !== "merge_node" && op.type !== "insert_node") {
             editor.current.apply(op);
@@ -427,7 +428,7 @@ const SyncingEditor = ({ groupId }) => {
             borderRadius: "5px",
             textAlign: "center",
             fontWeight: "bold",
-            paddingTop: "5px"
+            paddingTop: "5px",
           }}
           onMouseDown={(event) => {
             event.preventDefault();
